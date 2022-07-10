@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:12.3-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      TZ: 'Asia/Tokyo'
+      PGTZ: 'Asia/Tokyo'
+      POSTGRES_USER: $DB_USER_NAME
+      POSTGRES_PASSWORD: $DB_PASSWORD
+
+  web:
+    build:
+      context: ./web
+      args:
+        WORKDIR: $WORKDIR
+        HOST: $WEB_HOST
+        PORT: $WEB_PORT
+        DB_HOST_NAME: $DB_HOST_NAME
+        DB_DATABASE_NAME: $DB_DATABASE_NAME
+        DB_USER_NAME: $DB_USER_NAME
+        DB_PASSWORD: $DB_PASSWORD
+    command: sh -c "rm -f /app/tmp/pids/server.pid && bundle exec rails s -b ${WEB_HOST}"
+    volumes:
+      - ./web:/$WORKDIR
+      - web-bundle:/usr/local/bundle
+    depends_on:
+      - $DB_HOST_NAME
+    stdin_open: true
+    tty: true
+    ports:
+      - $WEB_PORT:3000
+    # environment:
+    #   RAILS_ENV: "production"
+
+volumes:
+  db-data:
+  web-bundle:
