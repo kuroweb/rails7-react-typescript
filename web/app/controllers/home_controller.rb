@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
   def index
-    @message = "Hello, world!"
+    @props = "Hello, world!"
   end
 end
