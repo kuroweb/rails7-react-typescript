@@ -4,16 +4,19 @@ ARG WORKDIR
 WORKDIR $WORKDIR
 
 ARG HOST
-ARG WEB_PORT
+ARG PORT
 
 RUN apt-get update && apt-get install -y \
     nodejs \
     postgresql-client \
     yarn \
+    npm \
     less \
     vim \
     curl \
     sudo
+
+RUN apt-get install -y nodejs npm && npm install n -g && n 18.4.0
 
 COPY . .
 RUN bundle install
@@ -32,5 +35,5 @@ ARG DB_PASSWORD
 ENV DB_PASSWORD $DB_PASSWORD
 # ----------------------------------------
 
-EXPOSE $WEB_PORT
+EXPOSE $PORT
 CMD ["rails" "server" "-b" "${HOST}"]

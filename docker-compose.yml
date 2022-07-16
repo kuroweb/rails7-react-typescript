@@ -16,25 +16,53 @@ services:
       context: ./web
       args:
         WORKDIR: $WORKDIR
-        HOST: $WEB_HOST
-        PORT: $WEB_PORT
+        HOST: 0.0.0.0
+        PORT: 3000
         DB_HOST_NAME: $DB_HOST_NAME
         DB_DATABASE_NAME: $DB_DATABASE_NAME
         DB_USER_NAME: $DB_USER_NAME
         DB_PASSWORD: $DB_PASSWORD
-    command: sh -c "rm -f /app/tmp/pids/server.pid && bundle exec rails s -b ${WEB_HOST}"
+    environment:
+      VITE_RUBY_HOST: vite
+    command: sh -c "
+      rm -f /${WORKDIR}/tmp/pids/server.pid &&
+      bundle exec rails s -b 0.0.0.0"
     volumes:
       - ./web:/$WORKDIR
-      - web-bundle:/usr/local/bundle
+      - web_bundle:/usr/local/bundle
+      - web_node_modules:/$WORKDIR/node_modules
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+    ports:
+      - 3000:3000
+  vite:
+    build:
+      context: ./web
+      args:
+        WORKDIR: $WORKDIR
+        HOST: 0.0.0.0
+        PORT: 3000
+        DB_HOST_NAME: $DB_HOST_NAME
+        DB_DATABASE_NAME: $DB_DATABASE_NAME
+        DB_USER_NAME: $DB_USER_NAME
+        DB_PASSWORD: $DB_PASSWORD
+    environment:
+      VITE_RUBY_HOST: 0.0.0.0
+    command: sh -c "bin/vite dev"
+    volumes:
+      - ./web:/$WORKDIR
+      - web_bundle:/usr/local/bundle
+      - web_node_modules:/$WORKDIR/node_modules
     depends_on:
       - $DB_HOST_NAME
     stdin_open: true
     tty: true
     ports:
-      - $WEB_PORT:3000
-    # environment:
-    #   RAILS_ENV: "production"
+      - 3036:3036
 
 volumes:
   db-data:
-  web-bundle:
+  web_bundle:
+  web_node_modules:
