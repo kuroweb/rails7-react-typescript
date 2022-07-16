@@ -3,9 +3,6 @@ FROM ruby:3.0.2
 ARG WORKDIR
 WORKDIR $WORKDIR
 
-ARG HOST
-ARG PORT
-
 RUN apt-get update && apt-get install -y \
     nodejs \
     postgresql-client \
@@ -35,5 +32,8 @@ ARG DB_PASSWORD
 ENV DB_PASSWORD $DB_PASSWORD
 # ----------------------------------------
 
-EXPOSE $PORT
-CMD ["rails" "server" "-b" "${HOST}"]
+# ARG HOST
+# ARG PORT
+
+# EXPOSE $PORT
+# CMD ["rails" "server" "-b" "${HOST}"]
