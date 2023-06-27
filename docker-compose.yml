@@ -1,43 +1,51 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:12.3-alpine
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    environment:
-      TZ: 'Asia/Tokyo'
-      PGTZ: 'Asia/Tokyo'
-      POSTGRES_USER: $DB_USER_NAME
-      POSTGRES_PASSWORD: $DB_PASSWORD
-
   web:
     build:
-      context: ./web
-      args:
-        WORKDIR: $WORKDIR
-        # HOST: 0.0.0.0
-        # PORT: 3000
-        DB_HOST_NAME: $DB_HOST_NAME
-        DB_DATABASE_NAME: $DB_DATABASE_NAME
-        DB_USER_NAME: $DB_USER_NAME
-        DB_PASSWORD: $DB_PASSWORD
-    command: sh -c "
-      rm -f /${WORKDIR}/tmp/pids/server.pid &&
-      bundle exec foreman start -f Procfile.dev"
-    volumes:
-      - ./web:/$WORKDIR
-      - web_bundle:/usr/local/bundle
-      - web_node_modules:/$WORKDIR/node_modules
-    depends_on:
-      - db
-    stdin_open: true
-    tty: true
+      dockerfile: Dockerfile
     ports:
       - 3000:3000
       - 3036:3036
+    depends_on:
+      db:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app
+      - node-modules:/app/node_modules
+      - web-bundle:/usr/local/bundle
+    command: >
+      sh -c "
+        vite dev &
+        rm -f /app/tmp/pids/server.pid
+        rails s -b 0.0.0.0 -p 3000
+      "
+
+  db:
+    image: mysql/mysql-server:8.0
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    stdin_open: true
+    tty: true
+    volumes:
+      - mysql-data:/var/lib/mysql
 
 volumes:
-  db-data:
-  web_bundle:
-  web_node_modules:
+  web-bundle:
+  mysql-data:
+  node-modules:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/node_modules
+      o: bind

@@ -1,1 +1,1 @@
-# rails7-react-typescript
+# Rails7 + React + TypeScript
