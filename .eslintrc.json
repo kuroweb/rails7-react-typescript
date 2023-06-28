@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "prettier",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:import/warnings",
+    "plugin:tailwindcss/recommended"
+  ],
+  "ignorePatterns": ["*.config.js"],
+  "rules": {}
+}
