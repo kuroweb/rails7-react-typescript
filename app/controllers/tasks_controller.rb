@@ -1,4 +1,4 @@
-class HomeController < ApplicationController
+class TasksController < ApplicationController
   def index
     @props = "Hello, world!"
   end
