@@ -12,5 +12,6 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {},
+  "ignorePatterns": ["vite.config.ts"],
   "root": true
 }
